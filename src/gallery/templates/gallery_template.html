@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ gallery_title }}</title>
+    <style>
+        {{ css_content }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ gallery_title }}</h1>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark</span>
+            </button>
+        </div>
+        <div class="filters">
+            <input type="text" id="searchInput" class="filter-input" placeholder="Search posts...">
+            <select id="artistFilter" class="filter-select">
+                <option value="">All Artists</option>
+            </select>
+            <select id="sortFilter" class="filter-select">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="artist-asc">Artist A-Z</option>
+                <option value="artist-desc">Artist Z-A</option>
+                <option value="title-asc">Title A-Z</option>
+                <option value="title-desc">Title Z-A</option>
+            </select>
+            <div class="media-filters">
+                <span class="media-filters-label">Media:</span>
+                <button class="media-filter-btn active" data-media="all">All</button>
+                <button class="media-filter-btn" data-media="images">Images</button>
+                <button class="media-filter-btn" data-media="gifs">GIFs</button>
+                <button class="media-filter-btn" data-media="videos">Videos</button>
+                <button class="media-filter-btn" data-media="mixed">Mixed</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="gallery" id="gallery">
+            <!-- Posts will be inserted here -->
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="media-navigation" id="mediaNavigation"></div>
+                <div class="media-viewer" id="mediaViewer">
+                    <div class="zoom-controls" id="zoomControls">
+                        <button class="zoom-btn" id="fitBtn" onclick="toggleFitWindow()" title="Fit to window">⛶</button>
+                        <button class="zoom-btn" id="zoomOutBtn" onclick="zoomImage(-0.5)" title="Zoom out">−</button>
+                        <button class="zoom-btn" id="zoomInBtn" onclick="zoomImage(0.5)" title="Zoom in">+</button>
+                        <button class="zoom-btn" id="resetBtn" onclick="resetZoom()" title="Reset zoom">⌂</button>
+                    </div>
+                    <div class="media-hover-zone left" onclick="navigateMedia(-1)">
+                        <button class="media-nav-arrow prev">‹</button>
+                    </div>
+                    <div class="media-hover-zone right" onclick="navigateMedia(1)">
+                        <button class="media-nav-arrow next">›</button>
+                    </div>
+                </div>
+                <div id="modalText"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        var posts = {{ posts_json }};
+        {{ js_content }}
+    </script>
+</body>
+</html>
