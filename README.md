@@ -17,8 +17,7 @@ A Python tool that generates beautiful static HTML galleries from organized art 
 
 ```
 art-gallery-generator/
-├── gallery_generator.py          # Main entry point (original)
-├── builtin_gallery_generator.py  # Enhanced version with download support
+├── gallery_generator.py          # Main entry point with optional download support
 ├── src/
 │   └── gallery/
 │       ├── __init__.py
@@ -70,20 +69,14 @@ python3 gallery_generator.py /path/to/art --output my_gallery --verbose
 
 ```bash
 # Generate gallery and download content from Google Drive links
-python3 builtin_gallery_generator.py /path/to/art --download --verbose
+python3 gallery_generator.py /path/to/art --download --verbose
 
 # Standard gallery generation (without downloads)
-python3 builtin_gallery_generator.py /path/to/art --verbose
+python3 gallery_generator.py /path/to/art --verbose
 ```
 
 ### Options
 
-#### Standard Gallery Generator (`gallery_generator.py`)
-- `art_directory`: Path to your organized art directory (required)
-- `-o, --output`: Output directory name (default: "gallery")
-- `-v, --verbose`: Enable detailed output during generation
-
-#### Enhanced Gallery Generator (`builtin_gallery_generator.py`)
 - `art_directory`: Path to your organized art directory (required)
 - `-o, --output`: Output directory name (default: "gallery")
 - `-v, --verbose`: Enable detailed output during generation
@@ -131,12 +124,12 @@ The generator supports these folder naming patterns:
 Create `links-*.txt` files in post directories with content like:
 
 ```
-https://drive.google.com/file/d/1BwzxRSZNmy_ynmRuGOVmIVQnW1SDg3Nl/view?usp=sharing
+https://drive.google.com/file/d/1V1stk-hBzXXuyhOs-e2PjoR86GZxSdJf/view?usp=sharing
 https://www.patreon.com/c/leaflit/shop
 
 Please download this month rewards in the link, it will be deleted at the end of THIS month!
 
-DOWNLOAD HERE: https://drive.google.com/file/d/1BwzxRSZNmy_ynmRuGOVmIVQnW1SDg3Nl/view?usp=sharing
+DOWNLOAD HERE: https://drive.google.com/file/d/1V1stk-hBzXXuyhOs-e2PjoR86GZxSdJf/view?usp=sharing
 
 Want to get the content but it's not available anymore? Please check out my shop: https://www.patreon.com/c/leaflit/shop
 ```
@@ -223,16 +216,15 @@ python3 gallery_generator.py ~/Art --verbose
 ### Enhanced Workflow
 ```bash
 # Generate gallery and download available content
-python3 builtin_gallery_generator.py ~/Art --download --verbose
+python3 gallery_generator.py ~/Art --download --verbose
 ```
 
 ### Mixed Workflow
 ```bash
 # First, try downloading content
-python3 builtin_gallery_generator.py ~/Art --download --verbose
+python3 gallery_generator.py ~/Art --download --verbose
 
-# Then generate final gallery (if downloads change your content)
-python3 gallery_generator.py ~/Art --verbose
+# Downloads are integrated, so the gallery includes all content automatically
 ```
 
 ## Troubleshooting
@@ -257,10 +249,19 @@ python3 gallery_generator.py ~/Art --verbose
 - Ensure you have write permissions to the output directory
 - On some systems, you may need to run with elevated permissions
 
-## Version Differences
+## Single Script Design
 
-| Feature | `gallery_generator.py` | `builtin_gallery_generator.py` |
-|---------|----------------------|--------------------------------|
+The gallery generator now includes optional download functionality built-in:
+
+- **Without `--download` flag**: Works exactly as the original generator
+- **With `--download` flag**: Adds automatic content downloading from Google Drive links
+- **No breaking changes**: All existing functionality remains unchanged
+- **Future-proof**: New features will be added to the single script
+
+## Version Features
+
+| Feature | Standard Mode | Download Mode (`--download`) |
+|---------|---------------|------------------------------|
 | Gallery Generation | ✅ | ✅ |
 | Video Thumbnails | ✅ | ✅ |
 | Content Downloads | ❌ | ✅ |
