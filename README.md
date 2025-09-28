@@ -26,6 +26,8 @@ art-gallery-generator/
 │       ├── video.py              # Video processing
 │       ├── media.py              # Media file handling
 │       ├── generator.py          # Core gallery generator
+│       ├── enhanced_generator.py # Enhanced generator with download support
+│       ├── downloader.py         # Content downloading functionality
 │       ├── template_loader.py    # Template management
 │       ├── templates/
 │       │   └── gallery_template.html
@@ -199,6 +201,16 @@ Edit `src/gallery/config.py` to change:
 - Thumbnail settings
 - Gallery title and defaults
 
+### Extending Download Sources
+Add new download sources by extending the `ContentDownloader` class in `src/gallery/downloader.py`:
+
+```python
+class ContentDownloader:
+    def download_from_new_source(self, url: str) -> bool:
+        # Add support for new platforms
+        pass
+```
+
 ## Requirements
 
 - **Python 3.7+** (required)
@@ -251,23 +263,52 @@ python3 gallery_generator.py ~/Art --download --verbose
 
 ## Single Script Design
 
-The gallery generator now includes optional download functionality built-in:
+The gallery generator uses a clean, modular architecture:
 
-- **Without `--download` flag**: Works exactly as the original generator
-- **With `--download` flag**: Adds automatic content downloading from Google Drive links
+- **`gallery_generator.py`**: Simple main script that handles command-line arguments and chooses the appropriate generator
+- **`src/gallery/generator.py`**: Core gallery generation functionality (your original code)
+- **`src/gallery/enhanced_generator.py`**: Enhanced version that adds download capabilities
+- **`src/gallery/downloader.py`**: Dedicated module for content downloading from various sources
+
+### Modes of Operation
+
+- **Without `--download` flag**: Uses the standard `ArtGalleryGenerator` class
+- **With `--download` flag**: Uses the `EnhancedArtGalleryGenerator` class with integrated downloading
 - **No breaking changes**: All existing functionality remains unchanged
-- **Future-proof**: New features will be added to the single script
+- **Modular design**: Easy to extend with new download sources or gallery features
 
-## Version Features
+## Architecture
 
-| Feature | Standard Mode | Download Mode (`--download`) |
-|---------|---------------|------------------------------|
-| Gallery Generation | ✅ | ✅ |
-| Video Thumbnails | ✅ | ✅ |
-| Content Downloads | ❌ | ✅ |
-| External Dependencies | None | None |
-| Google Drive Support | ❌ | ✅ |
-| Link Analysis | ❌ | ✅ |
+The project follows a clean, modular design:
+
+```
+┌─────────────────────┐
+│ gallery_generator.py│  ← Main entry point (argument parsing)
+└──────────┬──────────┘
+           │
+    ┌──────▼──────┐
+    │   --download?   │  ← Decision point
+    └──────┬──────┘
+           │
+  ┌────────▼────────┐
+  │ No │         │ Yes │
+  ▼    │         ▼     │
+┌─────────────┐ ┌──────────────────┐
+│ generator.py│ │enhanced_generator.py│
+│ (standard)  │ │   (with downloads)   │
+└─────────────┘ └─────────┬──────────┘
+                          │
+                ┌─────────▼─────────┐
+                │   downloader.py   │  ← Content downloading
+                │  (ContentDownloader) │
+                └───────────────────┘
+```
+
+This design ensures:
+- **Clean separation** of concerns
+- **Easy maintenance** and testing
+- **Simple extension** for new features
+- **No code duplication** between modes
 
 ## License
 
