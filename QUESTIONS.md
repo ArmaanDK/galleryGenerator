@@ -1,7 +1,7 @@
 # Questions / Decisions Needed
 
 ## Open Questions
-- Should we add support for password-protected ZIPs?
+- Alternate methods to make page load quickly and reduce RAM usage?
 - Should downloads be async for better performance?
 
 ## Answered
