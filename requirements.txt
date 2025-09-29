@@ -1,13 +1,76 @@
 # Art Gallery Generator Requirements
-# No external dependencies required - uses only Python standard library
+# 
+# This file lists optional dependencies that enhance functionality.
+# The core gallery generator works without ANY of these dependencies!
+#
+# Installation:
+#   pip install -r requirements.txt
+#
+# Or install only what you need:
+#   pip install Pillow  # For image processing only
 
-# Optional: If you want to extend with additional image processing
+# ==============================================================================
+# OPTIONAL: Image Processing
+# ==============================================================================
+# Pillow (PIL) - For potential future image optimization features
+# Currently NOT used by the generator, but useful for extensions
 # Pillow>=9.0.0
 
-# Optional: For advanced video processing beyond ffmpeg
+# ==============================================================================
+# OPTIONAL: Video Processing  
+# ==============================================================================
+# OpenCV - For advanced video processing beyond ffmpeg
+# Currently NOT used, but useful if you want to extend video features
 # opencv-python>=4.5.0
 
-# Development dependencies (optional)
+# ==============================================================================
+# DEVELOPMENT DEPENDENCIES (Optional)
+# ==============================================================================
+# Code Formatting
 # black>=22.0.0
+
+# Code Linting  
 # flake8>=4.0.0
+# pylint>=2.12.0
+
+# Type Checking
+# mypy>=0.930
+
+# Testing (when tests are added)
 # pytest>=7.0.0
+# pytest-cov>=3.0.0
+
+# ==============================================================================
+# NOTES
+# ==============================================================================
+# 
+# Q: Why are there no required dependencies?
+# A: The generator uses only Python's standard library:
+#    - pathlib for file operations
+#    - zipfile for ZIP extraction
+#    - urllib for downloads
+#    - json for data serialization
+#
+# Q: What about ffmpeg?
+# A: ffmpeg is a system-level tool, not a Python package.
+#    Install it separately using your system's package manager:
+#    - macOS: brew install ffmpeg
+#    - Linux: sudo apt install ffmpeg
+#    - Windows: Download from ffmpeg.org
+#
+# Q: Should I uncomment the optional dependencies?
+# A: Only if you plan to extend the project with those features.
+#    The generator works perfectly fine without them!
+#
+# Q: How do I know if I need these?
+# A: You probably don't! They're mainly for developers who want to
+#    add new features or contribute to the project.
+#
+# ==============================================================================
+# FOR NEW CONTRIBUTORS
+# ==============================================================================
+# If you're new to Python and want to contribute:
+# 1. You DON'T need to install anything from this file to start
+# 2. The project runs with just Python 3.7+
+# 3. Only install dev dependencies if you want to run linters/formatters
+# 4. See CONTRIBUTING.md for complete setup instructions
