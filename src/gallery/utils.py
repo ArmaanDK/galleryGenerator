@@ -11,6 +11,59 @@ from typing import Tuple, Optional
 from .config import SUPPORTED_IMAGE_FORMATS, SUPPORTED_VIDEO_FORMATS
 
 
+def should_skip_file(file_path: Path) -> bool:
+    """
+    Check if a file should be skipped during processing.
+    Filters out AppleDouble files, system files, and other unwanted content.
+    
+    This is the centralized filtering function used throughout the application
+    to ensure consistent filtering behavior.
+    
+    Args:
+        file_path: Path to the file to check
+        
+    Returns:
+        True if file should be skipped, False otherwise
+        
+    Example:
+        >>> should_skip_file(Path("._myfile.jpg"))
+        True
+        >>> should_skip_file(Path(".DS_Store"))
+        True
+        >>> should_skip_file(Path("myfile.jpg"))
+        False
+    """
+    filename = file_path.name
+    
+    # Skip system and metadata files
+    skip_patterns = [
+        '._',           # AppleDouble files (macOS resource forks)
+        '.DS_Store',    # macOS directory metadata  
+        'Thumbs.db',    # Windows thumbnail cache
+        'desktop.ini',  # Windows folder settings
+        '__MACOSX',     # macOS compression artifacts
+    ]
+    
+    # Check if filename starts with any skip pattern
+    for pattern in skip_patterns:
+        if filename.startswith(pattern):
+            return True
+    
+    # Skip other hidden files (starting with .)
+    if filename.startswith('.'):
+        return True
+    
+    # Skip links files
+    if filename.startswith('links-'):
+        return True
+    
+    # Skip ZIP files (they should be extracted, not displayed)
+    if file_path.suffix.lower() == '.zip':
+        return True
+        
+    return False
+
+
 def check_ffmpeg() -> bool:
     """Check if ffmpeg is available on the system."""
     try:
@@ -89,12 +142,18 @@ def get_media_type(file_path: Path) -> Optional[str]:
     """
     Determine the media type of a file based on its extension.
     
+    Also filters out files that should be skipped (AppleDouble, system files, etc.)
+    
     Args:
         file_path: Path to the file
         
     Returns:
-        Media type ('image', 'gif', 'video') or None if unsupported
+        Media type ('image', 'gif', 'video') or None if unsupported or should be skipped
     """
+    # First check if file should be skipped
+    if should_skip_file(file_path):
+        return None
+    
     ext = file_path.suffix.lower()
     
     if ext == '.gif':

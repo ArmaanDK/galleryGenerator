@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from .utils import get_media_type, make_safe_filename
+from .utils import get_media_type, make_safe_filename, should_skip_file
 from .video import VideoProcessor
 
 
@@ -57,16 +57,28 @@ class MediaProcessor:
                     # Get list of files in the ZIP
                     file_list = zip_ref.namelist()
                     
-                    # Filter for supported media files
+                    # Filter for supported media files AND skip system files
                     media_files = []
                     for file_name in file_list:
                         file_path = Path(file_name)
+                        
+                        # Skip directories
+                        if file_name.endswith('/'):
+                            continue
+                        
+                        # Skip AppleDouble and system files in ZIP
+                        if should_skip_file(file_path):
+                            if self.verbose:
+                                print(f"      ⏭️  Skipping system file: {file_path.name}")
+                            continue
+                        
+                        # Check if it's a supported media type
                         if get_media_type(file_path) is not None:
                             media_files.append(file_name)
                     
                     if media_files:
                         if self.verbose:
-                            print(f"      📁 Extracting {len(media_files)} media files from {zip_file.name}")
+                            print(f"      📂 Extracting {len(media_files)} media files from {zip_file.name}")
                         
                         # Extract only media files
                         for media_file in media_files:
@@ -165,17 +177,14 @@ class MediaProcessor:
         # First, try to extract any ZIP files
         if self.extract_zip_files(post_dir):
             if self.verbose:
-                print(f"    🔄 ZIP extraction completed for {post_dir.name}")
+                print(f"    📄 ZIP extraction completed for {post_dir.name}")
         
         media_files = []
         
         # Get media files from the main directory
         for file_path in sorted(post_dir.iterdir()):
-            if (file_path.is_file() and 
-                not file_path.name.startswith('links-') and 
-                not file_path.suffix.lower() == '.zip' and
-                not file_path.suffix.lower() == '.psd'):  # Skip PSD files as they're not web-displayable
-                
+            # Skip files that should be filtered
+            if file_path.is_file() and not should_skip_file(file_path):
                 media_type = get_media_type(file_path)
                 if media_type:
                     media_files.append({
@@ -188,7 +197,8 @@ class MediaProcessor:
         extracted_dir = post_dir / "extracted"
         if extracted_dir.exists() and extracted_dir.is_dir():
             for file_path in sorted(extracted_dir.iterdir()):
-                if file_path.is_file():
+                # Skip files that should be filtered
+                if file_path.is_file() and not should_skip_file(file_path):
                     media_type = get_media_type(file_path)
                     if media_type:
                         # Mark extracted files with a prefix for clarity

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Centralized File Filtering**: New `should_skip_file()` function in utils.py
+  - Single source of truth for all file filtering across the application
+  - Consistent behavior in all modules (media, enhanced_media, video)
+  - Better verbose logging shows when system files are skipped
+
+### Changed
+- **Enhanced AppleDouble Filtering**: Complete pipeline coverage
+  - Now filters AppleDouble files (`._filename`) in all processing stages
+  - Filters during directory scanning (media.py, enhanced_media.py)
+  - Filters during ZIP extraction (both standard and enhanced modes)
+  - Filters before video thumbnail generation (video.py)
+  - Eliminates broken thumbnails caused by macOS resource fork files
+  
+- **Improved get_media_type()**: Now calls centralized filtering first
+  - Returns None for system files before checking media type
+  - Prevents system files from being processed as media
+
+- **Better Error Prevention**: Proactive filtering vs reactive handling
+  - System files never enter processing pipeline
+  - Reduces wasted CPU cycles on invalid files
+  - Cleaner verbose output with skip notifications
+
+### Fixed
+- AppleDouble files no longer appear as thumbnails in gallery
+- Video processor no longer attempts to generate thumbnails from `._video.mp4` files
+- ZIP extraction properly skips `._` files and `__MACOSX` folders
+- Standard mode (--no-extract-zips) now has same filtering as enhanced mode
+- Consistent system file filtering across all gallery generation modes
+
 ### To Do
 - Add automated tests
 - Add batch processing support

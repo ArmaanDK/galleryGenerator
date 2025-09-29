@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from .utils import get_media_type, make_safe_filename
+from .utils import get_media_type, make_safe_filename, should_skip_file
 from .video import VideoProcessor
 
 
@@ -28,37 +28,6 @@ class EnhancedMediaProcessor:
             from .utils import check_ffmpeg
             self._ffmpeg_available = check_ffmpeg()
         return self._ffmpeg_available
-    
-    def _should_skip_file(self, file_path: Path) -> bool:
-        """
-        Check if a file should be skipped during processing.
-        Filters out AppleDouble files and other system files.
-        """
-        filename = file_path.name
-        
-        # Skip system and metadata files
-        skip_patterns = [
-            '._',           # AppleDouble files (macOS resource forks)
-            '.DS_Store',    # macOS directory metadata  
-            'Thumbs.db',    # Windows thumbnail cache
-            'desktop.ini',  # Windows folder settings
-            '__MACOSX',     # macOS compression artifacts
-        ]
-        
-        # Check if filename starts with any skip pattern
-        for pattern in skip_patterns:
-            if filename.startswith(pattern):
-                return True
-        
-        # Skip other hidden files (starting with .)
-        if filename.startswith('.'):
-            return True
-        
-        # Skip links files
-        if filename.startswith('links-'):
-            return True
-            
-        return False
     
     def extract_zip_files(self, post_dir: Path) -> bool:
         """
@@ -104,20 +73,27 @@ class EnhancedMediaProcessor:
                     extractable_files = []
                     for file_name in file_list:
                         file_path = Path(file_name)
-                        # Skip directories and system files
-                        if (not file_name.endswith('/') and 
-                            not self._should_skip_file(file_path)):
-                            
-                            # Check if file has an extractable extension
-                            if file_path.suffix.lower() in extractable_extensions:
-                                extractable_files.append(file_name)
-                            # Also extract files without extensions (might be images)
-                            elif not file_path.suffix and len(file_path.name) > 0:
-                                extractable_files.append(file_name)
+                        
+                        # Skip directories
+                        if file_name.endswith('/'):
+                            continue
+                        
+                        # Skip system files (AppleDouble, etc.)
+                        if should_skip_file(file_path):
+                            if self.verbose:
+                                print(f"      ⏭️  Skipping system file in ZIP: {file_path.name}")
+                            continue
+                        
+                        # Check if file has an extractable extension
+                        if file_path.suffix.lower() in extractable_extensions:
+                            extractable_files.append(file_name)
+                        # Also extract files without extensions (might be images)
+                        elif not file_path.suffix and len(file_path.name) > 0:
+                            extractable_files.append(file_name)
                     
                     if extractable_files:
                         if self.verbose:
-                            print(f"      📁 Extracting {len(extractable_files)} files from {zip_file.name}")
+                            print(f"      📂 Extracting {len(extractable_files)} files from {zip_file.name}")
                         
                         # Extract files
                         for file_name in extractable_files:
@@ -207,11 +183,7 @@ class EnhancedMediaProcessor:
         
         # Get files from main directory (only displayable media for gallery)
         for file_path in sorted(post_dir.iterdir()):
-            if file_path.is_file() and not self._should_skip_file(file_path):
-                # Skip ZIP files (they've been processed)
-                if file_path.suffix.lower() == '.zip':
-                    continue
-                
+            if file_path.is_file() and not should_skip_file(file_path):
                 media_type = get_media_type(file_path)
                 if media_type:
                     media_files.append({
@@ -225,7 +197,7 @@ class EnhancedMediaProcessor:
         extracted_dir = post_dir / "extracted"
         if extracted_dir.exists():
             for file_path in sorted(extracted_dir.iterdir()):
-                if file_path.is_file() and not self._should_skip_file(file_path):
+                if file_path.is_file() and not should_skip_file(file_path):
                     media_type = get_media_type(file_path)
                     if media_type:  # Only add displayable files to gallery
                         media_files.append({
@@ -331,7 +303,7 @@ class EnhancedMediaProcessor:
         document_extensions = {'.pdf', '.txt', '.md', '.rtf', '.doc'}
         
         for file_path in extracted_dir.iterdir():
-            if file_path.is_file() and not self._should_skip_file(file_path):
+            if file_path.is_file() and not should_skip_file(file_path):
                 ext = file_path.suffix.lower()
                 summary['total'] += 1
                 

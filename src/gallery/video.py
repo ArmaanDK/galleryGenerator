@@ -85,6 +85,14 @@ class VideoProcessor:
         Returns:
             True if successful, False otherwise
         """
+        # Validate that we're not processing a system file
+        from .utils import should_skip_file
+        
+        if should_skip_file(video_path):
+            if self.verbose:
+                print(f"    ⏭️  Skipping thumbnail generation for system file: {video_path.name}")
+            return False
+        
         try:
             # Ensure output directory exists
             output_path.parent.mkdir(parents=True, exist_ok=True)
